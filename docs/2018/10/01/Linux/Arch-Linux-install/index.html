@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="mask-icon" href="https://www.lengqing.org/pics/blog/logo.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文参照 Arch Linux 官方 Wiki ，地址：Installation guide 现在已经提供了与本文环境相搭配的安装脚本，在https://github.com/lengqing-org/arch-install里可以根据README使用。 创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）主要就是客户机系统类型的选择， 还有就是引导的选择，我这里">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Arch Linux 的安装">
+<meta property="og:url" content="https://www.lengqing.org/2018/10/01/Linux/Arch-Linux-install/index.html">
+<meta property="og:site_name" content="冷清的主页">
+<meta property="og:description" content="本文参照 Arch Linux 官方 Wiki ，地址：Installation guide 现在已经提供了与本文环境相搭配的安装脚本，在https://github.com/lengqing-org/arch-install里可以根据README使用。 创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）主要就是客户机系统类型的选择， 还有就是引导的选择，我这里">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/1.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/2.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/3.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/4.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/5.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/6.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/7.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/8.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/9.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/10.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/11.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/12.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/13.png">
+<meta property="og:image" content="https://blog.lengqing.org/pics/blog/arch_install/14.png">
+<meta property="og:updated_time" content="2019-12-01T19:44:36.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Arch Linux 的安装">
+<meta name="twitter:description" content="本文参照 Arch Linux 官方 Wiki ，地址：Installation guide 现在已经提供了与本文环境相搭配的安装脚本，在https://github.com/lengqing-org/arch-install里可以根据README使用。 创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）主要就是客户机系统类型的选择， 还有就是引导的选择，我这里">
+<meta name="twitter:image" content="https://blog.lengqing.org/pics/blog/arch_install/1.png">
+
+<link rel="canonical" href="https://www.lengqing.org/2018/10/01/Linux/Arch-Linux-install/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Arch Linux 的安装 | 冷清的主页</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">冷清的主页</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">闲暇时也许会更新吧</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about.html" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.lengqing.org/2018/10/01/Linux/Arch-Linux-install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://blog.lengqing.org/pics/blog/touxiangc.png">
+      <meta itemprop="name" content="lengqing5977">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="冷清的主页">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Arch Linux 的安装
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-10-01 18:19:50" itemprop="dateCreated datePublished" datetime="2018-10-01T18:19:50+08:00">2018-10-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-02 03:44:36" itemprop="dateModified" datetime="2019-12-02T03:44:36+08:00">2019-12-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>本文参照 Arch Linux 官方 Wiki ，地址：<a href="https://wiki.archlinux.org/index.php/Installation_guide_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#" target="_blank" rel="noopener">Installation guide </a></strong><br><strong>现在已经提供了与本文环境相搭配的安装脚本，在<a href="https://github.com/lengqing-org/arch-install" target="_blank" rel="noopener">https://github.com/lengqing-org/arch-install</a>里可以根据README使用。</strong></p>
+<h2 id="创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）"><a href="#创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）" class="headerlink" title="创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）"></a>创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）</h2><p>主要就是客户机系统类型的选择，<br><img src="https://blog.lengqing.org/pics/blog/arch_install/1.png" alt="system"></p>
+<p>还有就是引导的选择，我这里选用UEFI引导。<br><img src="https://blog.lengqing.org/pics/blog/arch_install/2.png" alt="UEFI"></p>
+<h2 id="准备启动盘"><a href="#准备启动盘" class="headerlink" title="准备启动盘"></a>准备启动盘</h2><p>下载启动镜像，由于在中国大陆地区，我选择网易163的下载地址：<br><a href="http://mirrors.163.com/archlinux/iso/" target="_blank" rel="noopener">http://mirrors.163.com/archlinux/iso/</a><br>下载好后检查 MD5 值，<br>然后可以自行制作启动U盘，或者挂载进虚拟机。</p>
+<h2 id="开机"><a href="#开机" class="headerlink" title="开机"></a>开机</h2><p><img src="https://blog.lengqing.org/pics/blog/arch_install/3.png" alt="start"><br>准备好了<br><img src="https://blog.lengqing.org/pics/blog/arch_install/4.png" alt="already"></p>
+<h2 id="联网以及更新系统时间"><a href="#联网以及更新系统时间" class="headerlink" title="联网以及更新系统时间"></a>联网以及更新系统时间</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dhcpcd</span><br><span class="line">ping -c 4 baidu.com</span><br></pre></td></tr></table></figure>
+
+<p>查看结果显示可以 ping 通，联网成功<br><img src="https://blog.lengqing.org/pics/blog/arch_install/5.png" alt="network"></p>
+<p>更新系统时间，没啥输出，不用管</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">timedatectl set-ntp true</span><br></pre></td></tr></table></figure>
+
+<h2 id="分区及挂载分区"><a href="#分区及挂载分区" class="headerlink" title="分区及挂载分区"></a>分区及挂载分区</h2><p>列出磁盘</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fdisk -l</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog.lengqing.org/pics/blog/arch_install/6.png" alt="disklist"><br>我这里第一块是 60GiB 的盘，设备是 /dev/sda 。<br>第二块应该是启动盘，不用管。</p>
+<p>对 /dev/sda 进行分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fdisk /dev/sda</span><br></pre></td></tr></table></figure>
+
+<p>创建 GPT 分区表</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g</span><br></pre></td></tr></table></figure>
+
+<p>创建一个新的分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">n</span><br></pre></td></tr></table></figure>
+
+<p>输入分区号，从1开始</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>输入起始扇区，默认回车即可<br>回车<br>输入 +200M 创建一个 esp 分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">+200M</span><br></pre></td></tr></table></figure>
+
+<p>继续创建新分区做根目录分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">n</span><br></pre></td></tr></table></figure>
+
+<p>回车<br>回车<br>由于没有其它分区，硬盘剩余空间都分配，所以直接回车分配所有空间<br>回车</p>
+<p>查看创建的分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">p</span><br></pre></td></tr></table></figure>
+
+<p>可以看到两个分区，分别是 200M 的 sda1 和 59.8G 的 sda2 （都没有格式化）<br><img src="https://blog.lengqing.org/pics/blog/arch_install/7.png" alt="diskparts"></p>
+<p>改变 200M 的esp 分区的类型</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">t</span><br></pre></td></tr></table></figure>
+
+<p>选择分区号</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>选择分区类型，按L可以列出所有类型，应该序号1是”EFI System”</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog.lengqing.org/pics/blog/arch_install/8.png" alt="esp"><br>保存更改</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">w</span><br></pre></td></tr></table></figure>
+
+<p>格式化 esp 分区和根分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkfs.fat -F32 /dev/sda1</span><br><span class="line">mkfs.ext4 /dev/sda2</span><br></pre></td></tr></table></figure>
+
+<p>挂载根分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount /dev/sda2 /mnt</span><br></pre></td></tr></table></figure>
+
+<p>挂载 esp 分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /mnt/boot</span><br><span class="line">mount /dev/sda1 /mnt/boot</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装基本系统"><a href="#安装基本系统" class="headerlink" title="安装基本系统"></a>安装基本系统</h2><p>选择镜像源<br>编辑源列表文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano /etc/pacman.d/mirrorlist</span><br></pre></td></tr></table></figure>
+
+<p>将 China 的那一行挪到最前面（也可以直接在最前面加上 China 的源地址，上面的具有优先权）<br>找到那一行，光标在最前面的时候直接按下 Ctrl+K ，然后回到第一行按下 Ctrl+U ，手打也行<br><img src="https://blog.lengqing.org/pics/blog/arch_install/9.png" alt="mirror"><br>然后按下 Ctrl+X ，输入 y ，回车，即可保存</p>
+<p>安装基本包（ base-devel 不是必须的，可以不加）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacstrap /mnt base linux linux-firmware</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog.lengqing.org/pics/blog/arch_install/10.png" alt="base"><br>这个样子就是系统装好了，只不过还不能开机</p>
+<h2 id="开机前配置"><a href="#开机前配置" class="headerlink" title="开机前配置"></a>开机前配置</h2><p>生成自动挂载分区的 fstab 文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">genfstab -U /mnt &gt;&gt; /mnt/etc/fstab</span><br></pre></td></tr></table></figure>
+
+<p>检查是否正确</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /mnt/etc/fstab</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog.lengqing.org/pics/blog/arch_install/11.png" alt="fstab"><br>理论上格式应该与我的完全相同，假如格式差别很大的可能就有问题了，也许手动检查 UUID 并创建 fstab 文件是个好主意。</p>
+<p>切换到新系统操作</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arch-chroot /mnt</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog.lengqing.org/pics/blog/arch_install/12.png" alt="chroot"><br>如图所示，即为成功</p>
+<p>设置时区（我比较靠近上海，便以上海为例）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span><br></pre></td></tr></table></figure>
+
+<p>根据硬件时间调整时间（ UTC 时间为例）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hwclock --systohc</span><br></pre></td></tr></table></figure>
+
+<p>本地化<br>编辑文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano /etc/locale.gen</span><br></pre></td></tr></table></figure>
+
+<p>将下面的几行前面的 # 删掉，保存</p>
+<blockquote>
+<p>en_US.UTF-8 UTF-8</p>
+<p>zh_CN.UTF-8 UTF-8</p>
+<p>zh_TW.UTF-8 UTF-8</p>
+</blockquote>
+<p>接着执行 locale-gen 以生成 locale 讯息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">locale-gen</span><br></pre></td></tr></table></figure>
+
+<p>选择英文作为默认语言（暂不推荐中文，以防乱码，等装了字体桌面什么的可以考虑中文）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano /etc/locale.conf</span><br></pre></td></tr></table></figure>
+
+<p>加入以下内容并保存</p>
+<blockquote>
+<p>LANG=en_US.UTF-8</p>
+</blockquote>
+<p>设置主机名</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano /etc/hostname</span><br></pre></td></tr></table></figure>
+
+<p>输入你要的主机名并保存</p>
+<p>编辑 hosts 文件<br>加入下面的内容，其中的 arch 替换为你的主机名</p>
+<blockquote>
+<p>127.0.0.1   localhost.localdomain   localhost</p>
+<p>::1     localhost.localdomain   localhost</p>
+<p>127.0.1.1   arch.localdomain  arch</p>
+</blockquote>
+<p>设置 root 密码</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">passwd</span><br></pre></td></tr></table></figure>
+
+<p>Intel CPU 需要安装的 intel-ucode</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacman -S intel-ucode</span><br></pre></td></tr></table></figure>
+
+<p>安装引导</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacman -S os-prober grub efibootmgr</span><br></pre></td></tr></table></figure>
+
+<p>部署grub</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub</span><br></pre></td></tr></table></figure>
+
+<p>生成配置文件（我这里会出错）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub-mkconfig -o /boot/grub/grub.cfg</span><br></pre></td></tr></table></figure>
+
+<p>报错</p>
+<blockquote>
+<p>warning failed to connect to lvmetad，falling back to device scanning.</p>
+</blockquote>
+<p>编辑 /etc/lvm/lvm.conf 文件，找到 use_lvmetad = 1 将1修改为0<br>（这一行在很下面，翻半天），保存，重新生成配置文件</p>
+<h2 id="重启进入新系统"><a href="#重启进入新系统" class="headerlink" title="重启进入新系统"></a>重启进入新系统</h2><p>安装基本上结束了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">exit</span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+<p>顺便拔掉启动盘<br>开机就算是进入新系统了，如果不能开机我也不管了，教程到这里结束<br>正常的开机应该跟我的一样<br><img src="https://blog.lengqing.org/pics/blog/arch_install/13.png" alt="boot"><br>然后滚更新，最新的，很棒！<br><img src="https://blog.lengqing.org/pics/blog/arch_install/14.png" alt="update"></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>lengqing5977
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.lengqing.org/2018/10/01/Linux/Arch-Linux-install/" title="Arch Linux 的安装">https://www.lengqing.org/2018/10/01/Linux/Arch-Linux-install/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-hans" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2018/09/16/Linux/rsync/" rel="next" title="rsync 的简单用法">
+                  <i class="fa fa-chevron-left"></i> rsync 的简单用法
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2019/04/09/Linux/PVE-installboot-config/" rel="prev" title="新装Proxmox VE之后的第一次开机配置">
+                  新装Proxmox VE之后的第一次开机配置 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）"><span class="nav-number">1.</span> <span class="nav-text">创建虚拟机（这不是必须的，也可以不一样，实机建议UEFI引导，本文只介绍UEFI引导）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#准备启动盘"><span class="nav-number">2.</span> <span class="nav-text">准备启动盘</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开机"><span class="nav-number">3.</span> <span class="nav-text">开机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#联网以及更新系统时间"><span class="nav-number">4.</span> <span class="nav-text">联网以及更新系统时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分区及挂载分区"><span class="nav-number">5.</span> <span class="nav-text">分区及挂载分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装基本系统"><span class="nav-number">6.</span> <span class="nav-text">安装基本系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开机前配置"><span class="nav-number">7.</span> <span class="nav-text">开机前配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重启进入新系统"><span class="nav-number">8.</span> <span class="nav-text">重启进入新系统</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="lengqing5977"
+    src="https://blog.lengqing.org/pics/blog/touxiangc.png">
+  <p class="site-author-name" itemprop="name">lengqing5977</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lengqing5977" title="GitHub &rarr; https://github.com/lengqing5977" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:root@lengqing.org" title="E-Mail &rarr; mailto:root@lengqing.org" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-hans" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lengqing5977</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

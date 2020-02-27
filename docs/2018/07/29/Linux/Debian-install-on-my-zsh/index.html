@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="mask-icon" href="https://www.lengqing.org/pics/blog/logo.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="安装 zsh 以及 git （ oh-my-zsh 需要）1apt-get install zsh git  切换默认 SH1chsh -s /bin/zsh  安装 oh-my-zsh (反正我这里 raw.github.com 连线质量比较差，下了好几次才好)1sh -c &quot;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Debian 安装 zsh 及 oh-my-zsh">
+<meta property="og:url" content="https://www.lengqing.org/2018/07/29/Linux/Debian-install-on-my-zsh/index.html">
+<meta property="og:site_name" content="冷清的主页">
+<meta property="og:description" content="安装 zsh 以及 git （ oh-my-zsh 需要）1apt-get install zsh git  切换默认 SH1chsh -s /bin/zsh  安装 oh-my-zsh (反正我这里 raw.github.com 连线质量比较差，下了好几次才好)1sh -c &quot;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-01T19:44:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Debian 安装 zsh 及 oh-my-zsh">
+<meta name="twitter:description" content="安装 zsh 以及 git （ oh-my-zsh 需要）1apt-get install zsh git  切换默认 SH1chsh -s /bin/zsh  安装 oh-my-zsh (反正我这里 raw.github.com 连线质量比较差，下了好几次才好)1sh -c &quot;$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-">
+
+<link rel="canonical" href="https://www.lengqing.org/2018/07/29/Linux/Debian-install-on-my-zsh/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Debian 安装 zsh 及 oh-my-zsh | 冷清的主页</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">冷清的主页</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">闲暇时也许会更新吧</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about.html" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.lengqing.org/2018/07/29/Linux/Debian-install-on-my-zsh/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://blog.lengqing.org/pics/blog/touxiangc.png">
+      <meta itemprop="name" content="lengqing5977">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="冷清的主页">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Debian 安装 zsh 及 oh-my-zsh
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-29 20:02:00" itemprop="dateCreated datePublished" datetime="2018-07-29T20:02:00+08:00">2018-07-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-02 03:44:35" itemprop="dateModified" datetime="2019-12-02T03:44:35+08:00">2019-12-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="安装-zsh-以及-git-（-oh-my-zsh-需要）"><a href="#安装-zsh-以及-git-（-oh-my-zsh-需要）" class="headerlink" title="安装 zsh 以及 git （ oh-my-zsh 需要）"></a>安装 zsh 以及 git （ oh-my-zsh 需要）</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install zsh git</span><br></pre></td></tr></table></figure>
+
+<h3 id="切换默认-SH"><a href="#切换默认-SH" class="headerlink" title="切换默认 SH"></a>切换默认 SH</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chsh -s /bin/zsh</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-oh-my-zsh-反正我这里-raw-github-com-连线质量比较差，下了好几次才好"><a href="#安装-oh-my-zsh-反正我这里-raw-github-com-连线质量比较差，下了好几次才好" class="headerlink" title="安装 oh-my-zsh (反正我这里 raw.github.com 连线质量比较差，下了好几次才好)"></a>安装 oh-my-zsh (反正我这里 raw.github.com 连线质量比较差，下了好几次才好)</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"</span><br></pre></td></tr></table></figure>
+
+<h3 id="更改主题"><a href="#更改主题" class="headerlink" title="更改主题"></a>更改主题</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano ~/.zshrc</span><br></pre></td></tr></table></figure>
+
+<p>其中有一行 </p>
+<blockquote>
+<p>ZSH_THEME=”robbyrussell”</p>
+</blockquote>
+<p>将其中的  robbyrussell 改成你想要的主题，或者 random ， random 是随机主题，每次登录随机换一个主题。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>lengqing5977
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.lengqing.org/2018/07/29/Linux/Debian-install-on-my-zsh/" title="Debian 安装 zsh 及 oh-my-zsh">https://www.lengqing.org/2018/07/29/Linux/Debian-install-on-my-zsh/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-hans" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2018/07/17/Linux/Linux-swapfile/" rel="next" title="Linux swapfile 的创建使用">
+                  <i class="fa fa-chevron-left"></i> Linux swapfile 的创建使用
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/2018/09/16/Linux/rsync/" rel="prev" title="rsync 的简单用法">
+                  rsync 的简单用法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-zsh-以及-git-（-oh-my-zsh-需要）"><span class="nav-number">1.</span> <span class="nav-text">安装 zsh 以及 git （ oh-my-zsh 需要）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#切换默认-SH"><span class="nav-number">2.</span> <span class="nav-text">切换默认 SH</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-oh-my-zsh-反正我这里-raw-github-com-连线质量比较差，下了好几次才好"><span class="nav-number">3.</span> <span class="nav-text">安装 oh-my-zsh (反正我这里 raw.github.com 连线质量比较差，下了好几次才好)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更改主题"><span class="nav-number">4.</span> <span class="nav-text">更改主题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="lengqing5977"
+    src="https://blog.lengqing.org/pics/blog/touxiangc.png">
+  <p class="site-author-name" itemprop="name">lengqing5977</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lengqing5977" title="GitHub &rarr; https://github.com/lengqing5977" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:root@lengqing.org" title="E-Mail &rarr; mailto:root@lengqing.org" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-hans" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lengqing5977</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

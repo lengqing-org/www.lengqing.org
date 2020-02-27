@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://www.lengqing.org/pics/blog/logo.png">
+  <link rel="mask-icon" href="https://www.lengqing.org/pics/blog/logo.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="LVM的基本使用方法LVM是Logical Volume Manager，逻辑卷管理器，逻辑卷类似Windows下的跨区卷吧。 原先我一直觉得LVM用处有限，自己没用上，一直没用，也就一直没写怎么用，后来发现还是挺有用的，尤其是搭配RAID来使用。 有几个概念先了解一下：    名称 英文 缩写 解释    物理存储介质 - - 在系统里一般是硬盘，也可以是块存储设备   物理卷 Physical">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LVM的基本使用方法">
+<meta property="og:url" content="https://www.lengqing.org/2019/12/02/Linux/LVM/index.html">
+<meta property="og:site_name" content="冷清的主页">
+<meta property="og:description" content="LVM的基本使用方法LVM是Logical Volume Manager，逻辑卷管理器，逻辑卷类似Windows下的跨区卷吧。 原先我一直觉得LVM用处有限，自己没用上，一直没用，也就一直没写怎么用，后来发现还是挺有用的，尤其是搭配RAID来使用。 有几个概念先了解一下：    名称 英文 缩写 解释    物理存储介质 - - 在系统里一般是硬盘，也可以是块存储设备   物理卷 Physical">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-02T13:36:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LVM的基本使用方法">
+<meta name="twitter:description" content="LVM的基本使用方法LVM是Logical Volume Manager，逻辑卷管理器，逻辑卷类似Windows下的跨区卷吧。 原先我一直觉得LVM用处有限，自己没用上，一直没用，也就一直没写怎么用，后来发现还是挺有用的，尤其是搭配RAID来使用。 有几个概念先了解一下：    名称 英文 缩写 解释    物理存储介质 - - 在系统里一般是硬盘，也可以是块存储设备   物理卷 Physical">
+
+<link rel="canonical" href="https://www.lengqing.org/2019/12/02/Linux/LVM/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>LVM的基本使用方法 | 冷清的主页</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">冷清的主页</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">闲暇时也许会更新吧</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about.html" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.lengqing.org/2019/12/02/Linux/LVM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://blog.lengqing.org/pics/blog/touxiangc.png">
+      <meta itemprop="name" content="lengqing5977">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="冷清的主页">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LVM的基本使用方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2019-12-02 00:17:00 / 修改时间：21:36:00" itemprop="dateCreated datePublished" datetime="2019-12-02T00:17:00+08:00">2019-12-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="LVM的基本使用方法"><a href="#LVM的基本使用方法" class="headerlink" title="LVM的基本使用方法"></a>LVM的基本使用方法</h1><p>LVM是Logical Volume Manager，逻辑卷管理器，逻辑卷类似Windows下的跨区卷吧。</p>
+<p>原先我一直觉得LVM用处有限，自己没用上，一直没用，也就一直没写怎么用，后来发现还是挺有用的，尤其是搭配RAID来使用。</p>
+<p>有几个概念先了解一下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">英文</th>
+<th align="center">缩写</th>
+<th align="center">解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">物理存储介质</td>
+<td align="center">-</td>
+<td align="center">-</td>
+<td align="center">在系统里一般是硬盘，也可以是块存储设备</td>
+</tr>
+<tr>
+<td align="center">物理卷</td>
+<td align="center">PhysicalVolume</td>
+<td align="center">PV</td>
+<td align="center">磁盘的分区转化来的</td>
+</tr>
+<tr>
+<td align="center">卷组</td>
+<td align="center">VolumeGroup</td>
+<td align="center">VG</td>
+<td align="center">物理卷组成的组，在LVM里等同于虚拟磁盘的意思</td>
+</tr>
+<tr>
+<td align="center">逻辑卷</td>
+<td align="center">LogicalVolume</td>
+<td align="center">LV</td>
+<td align="center">建立于卷组之上，在LVM里等同于虚拟分区的意思</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="center">PhysicalExtents</td>
+<td align="center">PE</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="center">LogicalExtents</td>
+<td align="center">LE</td>
+<td align="center">-</td>
+</tr>
+</tbody></table>
+<p>LVM大致上的概念就是把一个或多个物理磁盘的一个或多个分区合并在一起，称作卷组，也可以理解为变成了一块更大的虚拟磁盘。</p>
+<p>但是物理磁盘的分区不能直接合并到卷组里，需要转化，而转化之后的分区就称为物理卷。</p>
+<p>然后再创建逻辑卷，就相当于在这块更大的虚拟磁盘上划分分区。</p>
+<p>然后逻辑卷就可以格式化，挂载等基本操作。</p>
+<p>而PE和LE相当于卷组和逻辑卷的块，卷组大小=PE的大小xPE的数量，同理，逻辑卷的大小=LE的大小xLE的数量，PE默认4M，LE大小不知道是继承PE还是不继承，反正PE默认4M的情况下，LE默认也是4M。小了影响性能，大了占空间，没有专一用途，还是默认不设最好。</p>
+<h2 id="逻辑卷的创建与使用"><a href="#逻辑卷的创建与使用" class="headerlink" title="逻辑卷的创建与使用"></a>逻辑卷的创建与使用</h2><p>首先创建要加入逻辑卷的分区，这里是新添加的sdb盘，整盘分一个分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # fdisk /dev/sdb</span><br><span class="line"></span><br><span class="line">Welcome to fdisk (util-linux 2.33.1).</span><br><span class="line">Changes will remain in memory only, until you decide to write them.</span><br><span class="line">Be careful before using the write command.</span><br><span class="line"></span><br><span class="line">Device does not contain a recognized partition table.</span><br><span class="line">Created a new DOS disklabel with disk identifier 0x2f5191a8.</span><br><span class="line"></span><br><span class="line">Command (m for help): g</span><br><span class="line">Created a new GPT disklabel (GUID: 8B7DFDAA-0514-0146-9F52-1FDCF9F3D6E5).</span><br><span class="line"></span><br><span class="line">Command (m for help): n</span><br><span class="line">Partition number (1-128, default 1): 1</span><br><span class="line">First sector (2048-41943006, default 2048):</span><br><span class="line">Last sector, +/-sectors or +/-size&#123;K,M,G,T,P&#125; (2048-41943006, default 41943006):</span><br><span class="line"></span><br><span class="line">Created a new partition 1 of type 'Linux filesystem' and of size 20 GiB.</span><br><span class="line"></span><br><span class="line">Command (m for help): t</span><br><span class="line">Selected partition 1</span><br><span class="line">Partition type (type L to list all types): L</span><br><span class="line"></span><br><span class="line">Partition type (type L to list all types): 31</span><br><span class="line">Changed type of partition 'Linux filesystem' to 'Linux LVM'.</span><br><span class="line"></span><br><span class="line">Command (m for help): p</span><br><span class="line">Disk /dev/sdb: 20 GiB, 21474836480 bytes, 41943040 sectors</span><br><span class="line">Disk model: VMware Virtual S</span><br><span class="line">Units: sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disklabel type: gpt</span><br><span class="line">Disk identifier: 8B7DFDAA-0514-0146-9F52-1FDCF9F3D6E5</span><br><span class="line"></span><br><span class="line">Device     Start      End  Sectors Size Type</span><br><span class="line">/dev/sdb1   2048 41943006 41940959  20G Linux LVM</span><br><span class="line"></span><br><span class="line">Command (m for help): w                </span><br><span class="line">The partition table has been altered.</span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line">Syncing disks.</span><br></pre></td></tr></table></figure>
+
+<p>然后将sdb1分区转化为物理卷</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # pvcreate /dev/sdb1</span><br><span class="line">Physical volume "/dev/sdb1" successfully created.</span><br></pre></td></tr></table></figure>
+
+<p>使用物理卷/dev/sdb1创建名为VG1的卷组</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # vgcreate VG1 /dev/sdb1</span><br><span class="line">Volume group "VG1" successfully created</span><br></pre></td></tr></table></figure>
+
+<p>然后可以查看已有的卷组，我这里装系统就用了LVM，所以有个系统默认的system卷组</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # vgs</span><br><span class="line">  VG     #PV #LV #SN Attr   VSize  VFree</span><br><span class="line">  VG1      1   0   0 wz--n- 20.00g 20.00g</span><br><span class="line">  system   1   1   0 wz--n- 15.99g     0</span><br><span class="line">linux-wugz:/home/lengqing # vgdisplay</span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               system</span><br><span class="line">  System ID</span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        1</span><br><span class="line">  Metadata Sequence No  2</span><br><span class="line">  VG Access             read/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                1</span><br><span class="line">  Open LV               1</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                1</span><br><span class="line">  Act PV                1</span><br><span class="line">  VG Size               15.99 GiB</span><br><span class="line">  PE Size               4.00 MiB</span><br><span class="line">  Total PE              4093</span><br><span class="line">  Alloc PE / Size       4093 / 15.99 GiB</span><br><span class="line">  Free  PE / Size       0 / 0</span><br><span class="line">  VG UUID               BfPwXl-TBTe-N6Rd-NaJT-xU2T-Ce0V-HqIN8L</span><br><span class="line"></span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               VG1</span><br><span class="line">  System ID</span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        1</span><br><span class="line">  Metadata Sequence No  1</span><br><span class="line">  VG Access             read/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                0</span><br><span class="line">  Open LV               0</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                1</span><br><span class="line">  Act PV                1</span><br><span class="line">  VG Size               20.00 GiB</span><br><span class="line">  PE Size               4.00 MiB</span><br><span class="line">  Total PE              5119</span><br><span class="line">  Alloc PE / Size       0 / 0</span><br><span class="line">  Free  PE / Size       5119 / 20.00 GiB</span><br><span class="line">  VG UUID               ojpEne-jsFm-uB6R-azHU-zJmt-wP46-JvFeNc</span><br></pre></td></tr></table></figure>
+
+<p>这里是4M的PE，总共5119个PE，离显示的20.00GiB还差4MiB</p>
+<p>然后在VG1上创建名为LV1的逻辑卷</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # lvcreate -l 5119 -n LV1 VG1</span><br><span class="line">  Logical volume "LV1" created.</span><br></pre></td></tr></table></figure>
+
+<p>这里使用-l的参数，直接分配PE数量，也可以使用-L的参数，直接分配空间大小。但是实际可分配的空间不足以分配，比如显示20.00GiB，实际可分配空间只有5119x4MiB=20476MiB=19.996GiB，直接分配20G就会报错。</p>
+<p>到这里就已经创建好逻辑卷了，查看一下，这里还是有一个是系统创建的逻辑卷，叫root</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # lvs</span><br><span class="line">  LV   VG     Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  LV1  VG1    -wi-a----- 20.00g</span><br><span class="line">  root system -wi-ao---- 15.99g</span><br><span class="line">linux-wugz:/home/lengqing # lvdisplay</span><br><span class="line">  --- Logical volume ---</span><br><span class="line">  LV Path                /dev/system/root</span><br><span class="line">  LV Name                root</span><br><span class="line">  VG Name                system</span><br><span class="line">  LV UUID                fsZvJJ-NCk9-rHvR-rSOh-80tK-9GxZ-H5BRSw</span><br><span class="line">  LV Write Access        read/write</span><br><span class="line">  LV Creation host, time install, 2019-10-04 00:06:45 +0800</span><br><span class="line">  LV Status              available</span><br><span class="line"><span class="meta">  #</span> open                 1</span><br><span class="line">  LV Size                15.99 GiB</span><br><span class="line">  Current LE             4093</span><br><span class="line">  Segments               1</span><br><span class="line">  Allocation             inherit</span><br><span class="line">  Read ahead sectors     auto</span><br><span class="line">  - currently set to     1024</span><br><span class="line">  Block device           254:0</span><br><span class="line"></span><br><span class="line">  --- Logical volume ---</span><br><span class="line">  LV Path                /dev/VG1/LV1</span><br><span class="line">  LV Name                LV1</span><br><span class="line">  VG Name                VG1</span><br><span class="line">  LV UUID                xAccOh-PRJd-jtuR-jx7F-F9Qr-N3nw-Cxm7yh</span><br><span class="line">  LV Write Access        read/write</span><br><span class="line">  LV Creation host, time linux-wugz, 2019-12-02 02:22:10 +0800</span><br><span class="line">  LV Status              available</span><br><span class="line"><span class="meta">  #</span> open                 0</span><br><span class="line">  LV Size                20.00 GiB</span><br><span class="line">  Current LE             5119</span><br><span class="line">  Segments               1</span><br><span class="line">  Allocation             inherit</span><br><span class="line">  Read ahead sectors     auto</span><br><span class="line">  - currently set to     1024</span><br><span class="line">  Block device           254:1</span><br></pre></td></tr></table></figure>
+
+<p>然后对逻辑卷LV1进行格式化与挂载，需要注意的是xfs只能扩容，不能缩容，建议使用ext4</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # mkfs.xfs /dev/VG1/LV1</span><br><span class="line">meta-data=/dev/VG1/LV1           isize=512    agcount=4, agsize=1310464 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=1, sparse=0, rmapbt=0</span><br><span class="line">         =                       reflink=0</span><br><span class="line">data     =                       bsize=4096   blocks=5241856, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0, ftype=1</span><br><span class="line">log      =internal log           bsize=4096   blocks=2560, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line">linux-wugz:/home/lengqing # mkdir /mnt/lvm</span><br><span class="line">linux-wugz:/home/lengqing # mount /dev/VG1/LV1 /mnt/lvm</span><br><span class="line">linux-wugz:/home/lengqing # df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 2.0G  8.0K  2.0G   1% /dev</span><br><span class="line">tmpfs                    2.0G     0  2.0G   0% /dev/shm</span><br><span class="line">tmpfs                    2.0G  9.4M  2.0G   1% /run</span><br><span class="line">tmpfs                    2.0G     0  2.0G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/system-root   16G  7.5G  8.6G  47% /</span><br><span class="line">tmpfs                    394M   16K  394M   1% /run/user/1000</span><br><span class="line">/dev/mapper/VG1-LV1       20G   53M   20G   1% /mnt/lvm</span><br></pre></td></tr></table></figure>
+
+<p>要想开机挂载，在<code>/etc/fstab</code>中加一行就可以了</p>
+<blockquote>
+<p>/dev/mapper/VG1-LV1  /mnt/lvm  xfs defaults  0  1</p>
+</blockquote>
+<p>到这里为止，逻辑卷就可以正常用了，往其中添加一份文件，检查卸载逻辑卷后文件是不是不在了，以及后期逻辑卷的调整后此文件是不是还在</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # echo 'lengqinglvm' &gt; /mnt/lvm/lengqinglvm</span><br><span class="line">linux-wugz:/home/lengqing # cat /mnt/lvm/lengqinglvm</span><br><span class="line">lengqinglvm</span><br></pre></td></tr></table></figure>
+
+<h2 id="逻辑卷的扩容"><a href="#逻辑卷的扩容" class="headerlink" title="逻辑卷的扩容"></a>逻辑卷的扩容</h2><p>对新加入的磁盘sdc创建分区sdc1，转化物理卷，并添加到卷组VG1</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # fdisk /dev/sdc</span><br><span class="line"></span><br><span class="line">Welcome to fdisk (util-linux 2.33.1).</span><br><span class="line">Changes will remain in memory only, until you decide to write them.</span><br><span class="line">Be careful before using the write command.</span><br><span class="line"></span><br><span class="line">Device does not contain a recognized partition table.</span><br><span class="line">Created a new DOS disklabel with disk identifier 0xe5b9393b.</span><br><span class="line"></span><br><span class="line">Command (m for help): g</span><br><span class="line">Created a new GPT disklabel (GUID: F8A76081-C61D-6A41-A62E-F39B89C0D886).</span><br><span class="line"></span><br><span class="line">Command (m for help): n</span><br><span class="line">Partition number (1-128, default 1):</span><br><span class="line">First sector (2048-41943006, default 2048):</span><br><span class="line">Last sector, +/-sectors or +/-size&#123;K,M,G,T,P&#125; (2048-41943006, default 41943006):</span><br><span class="line"></span><br><span class="line">Created a new partition 1 of type 'Linux filesystem' and of size 20 GiB.</span><br><span class="line"></span><br><span class="line">Command (m for help): t</span><br><span class="line">Selected partition 1</span><br><span class="line">Partition type (type L to list all types): 31</span><br><span class="line">Changed type of partition 'Linux filesystem' to 'Linux LVM'.</span><br><span class="line"></span><br><span class="line">Command (m for help): w</span><br><span class="line">The partition table has been altered.</span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line">Syncing disks.</span><br><span class="line"></span><br><span class="line">linux-wugz:/home/lengqing # fdisk /dev/sdc -l</span><br><span class="line">Disk /dev/sdc: 20 GiB, 21474836480 bytes, 41943040 sectors</span><br><span class="line">Disk model: VMware Virtual S</span><br><span class="line">Units: sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disklabel type: gpt</span><br><span class="line">Disk identifier: F8A76081-C61D-6A41-A62E-F39B89C0D886</span><br><span class="line"></span><br><span class="line">Device     Start      End  Sectors Size Type</span><br><span class="line">/dev/sdc1   2048 41943006 41940959  20G Linux LVM</span><br><span class="line">linux-wugz:/home/lengqing # pvcreate /dev/sdc1</span><br><span class="line">  Physical volume "/dev/sdc1" successfully created.</span><br><span class="line">linux-wugz:/home/lengqing # vgextend VG1 /dev/sdc1</span><br><span class="line">  Volume group "VG1" successfully extended</span><br></pre></td></tr></table></figure>
+
+<p>此时查看卷组VG1，此时大小已经变为了39.99G，剩余空间20.00G</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # vgs</span><br><span class="line">  VG     #PV #LV #SN Attr   VSize  VFree</span><br><span class="line">  VG1      2   1   0 wz--n- 39.99g 20.00g</span><br><span class="line">  system   1   1   0 wz--n- 15.99g     0</span><br><span class="line">linux-wugz:/home/lengqing # vgdisplay</span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               system</span><br><span class="line">  System ID</span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        1</span><br><span class="line">  Metadata Sequence No  2</span><br><span class="line">  VG Access             read/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                1</span><br><span class="line">  Open LV               1</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                1</span><br><span class="line">  Act PV                1</span><br><span class="line">  VG Size               15.99 GiB</span><br><span class="line">  PE Size               4.00 MiB</span><br><span class="line">  Total PE              4093</span><br><span class="line">  Alloc PE / Size       4093 / 15.99 GiB</span><br><span class="line">  Free  PE / Size       0 / 0</span><br><span class="line">  VG UUID               BfPwXl-TBTe-N6Rd-NaJT-xU2T-Ce0V-HqIN8L</span><br><span class="line"></span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               VG1</span><br><span class="line">  System ID</span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        2</span><br><span class="line">  Metadata Sequence No  3</span><br><span class="line">  VG Access             read/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                1</span><br><span class="line">  Open LV               1</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                2</span><br><span class="line">  Act PV                2</span><br><span class="line">  VG Size               39.99 GiB</span><br><span class="line">  PE Size               4.00 MiB</span><br><span class="line">  Total PE              10238</span><br><span class="line">  Alloc PE / Size       5119 / 20.00 GiB</span><br><span class="line">  Free  PE / Size       5119 / 20.00 GiB</span><br><span class="line">  VG UUID               ojpEne-jsFm-uB6R-azHU-zJmt-wP46-JvFeNc</span><br></pre></td></tr></table></figure>
+
+<p>将剩余空间分配到逻辑卷LV1，注意<code>+</code>不能省，加号代表加空间，而不带加号代表就分配这么多</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # lvextend -l +5119 /dev/VG1/LV1</span><br><span class="line">  Size of logical volume VG1/LV1 changed from 20.00 GiB (5119 extents) to 39.99 GiB (10238 extents).</span><br><span class="line">  Logical volume VG1/LV1 successfully resized.</span><br></pre></td></tr></table></figure>
+
+<p>此时逻辑卷文件系统仍然是20G，需要调整文件系统大小才会改变</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # xfs_growfs /mnt/lvm/</span><br><span class="line">meta-data=/dev/mapper/VG1-LV1    isize=512    agcount=4, agsize=1310464 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=1        finobt=1 spinodes=0 rmapbt=0</span><br><span class="line">         =                       reflink=0</span><br><span class="line">data     =                       bsize=4096   blocks=5241856, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=1</span><br><span class="line">log      =internal               bsize=4096   blocks=2560, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line">data blocks changed from 5241856 to 10483712</span><br><span class="line">linux-wugz:/home/lengqing # df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 2.0G  8.0K  2.0G   1% /dev</span><br><span class="line">tmpfs                    2.0G     0  2.0G   0% /dev/shm</span><br><span class="line">tmpfs                    2.0G  9.4M  2.0G   1% /run</span><br><span class="line">tmpfs                    2.0G     0  2.0G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/system-root   16G  7.1G  8.9G  45% /</span><br><span class="line">tmpfs                    394M   12K  394M   1% /run/user/1000</span><br><span class="line">/dev/mapper/VG1-LV1       40G   74M   40G   1% /mnt/lvm</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是xfs扩容只能在挂载的情况下，命令后面只能跟挂载点，不能直接跟设备名，例如这样</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # xfs_growfs /dev/mapper/VG1-LV1</span><br><span class="line">xfs_growfs: /dev/mapper/VG1-LV1 is not a mounted XFS filesystem</span><br></pre></td></tr></table></figure>
+
+<p>之前创建的文件仍然正常</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # cat /mnt/lvm/lengqinglvm</span><br><span class="line">lengqinglvm</span><br></pre></td></tr></table></figure>
+
+<h2 id="逻辑卷的缩容"><a href="#逻辑卷的缩容" class="headerlink" title="逻辑卷的缩容"></a>逻辑卷的缩容</h2><p>由于xfs不能缩容，所以还得换ext4来演示（(⊙﹏⊙)早知道就不用xfs了）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # umount /mnt/lvm</span><br><span class="line">linux-wugz:/home/lengqing # mkfs.ext4 /dev/mapper/VG1-LV1</span><br><span class="line">mke2fs 1.43.8 (1-Jan-2018)</span><br><span class="line">/dev/mapper/VG1-LV1 contains a xfs file system</span><br><span class="line">Proceed anyway? (y,N) y</span><br><span class="line">Creating filesystem with 10483712 4k blocks and 2621440 inodes</span><br><span class="line">Filesystem UUID: cb51dc65-ffb4-4180-b886-ddec1a723a3b</span><br><span class="line">Superblock backups stored on blocks:</span><br><span class="line">        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208,</span><br><span class="line">        4096000, 7962624</span><br><span class="line"></span><br><span class="line">Allocating group tables: done</span><br><span class="line">Writing inode tables: done</span><br><span class="line">Creating journal (65536 blocks): done</span><br><span class="line">Writing superblocks and filesystem accounting information: done</span><br><span class="line"></span><br><span class="line">linux-wugz:/home/lengqing # mount /dev/mapper/VG1-LV1 /mnt/lvm/</span><br></pre></td></tr></table></figure>
+
+<p>要开机挂载的还得改一下<code>/etc/fstab</code></p>
+<blockquote>
+<p>/dev/mapper/VG1-LV1  /mnt/lvm  ext4 defaults  0  1</p>
+</blockquote>
+<p>然后还是添加一份文件，检查缩容后文件是否正常</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # echo 'lengqinglvmext4' &gt; /mnt/lvm/lengqinglvmext4</span><br><span class="line">linux-wugz:/home/lengqing # cat /mnt/lvm/lengqinglvmext4</span><br><span class="line">lengqinglvmext4</span><br></pre></td></tr></table></figure>
+
+<p>卸载分区并检查文件系统，卸载时工作目录不能在挂载点内</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing #  umount /mnt/lvm</span><br><span class="line">linux-wugz:/home/lengqing # e2fsck -f /dev/mapper/VG1-LV1</span><br><span class="line">e2fsck 1.43.8 (1-Jan-2018)</span><br><span class="line">Pass 1: Checking inodes, blocks, and sizes</span><br><span class="line">Pass 2: Checking directory structure</span><br><span class="line">Pass 3: Checking directory connectivity</span><br><span class="line">Pass 4: Checking reference counts</span><br><span class="line">Pass 5: Checking group summary information</span><br><span class="line">/dev/mapper/VG1-LV1: 12/2621440 files (0.0% non-contiguous), 242383/10483712 blocks</span><br></pre></td></tr></table></figure>
+
+<p>测试缩减逻辑卷，<code>-t</code>代表测试，需要注意的是只能按PE的整数倍来缩减，因为PE是最小存储单元，不能分配半个或者零点几个，这里PE是4M，按4M的整数倍都可以，注意不带减号是缩减到15G，而带了<code>-</code>是缩减15G</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # lvreduce -L 15G /dev/VG1/LV1 -t</span><br><span class="line">  TEST MODE: Metadata will NOT be updated and volumes will not be (de)activated.</span><br><span class="line">  WARNING: Reducing active logical volume to 15.00 GiB.</span><br><span class="line">  THIS MAY DESTROY YOUR DATA (filesystem etc.)</span><br><span class="line">Do you really want to reduce VG1/LV1? [y/n]: y</span><br><span class="line">  Size of logical volume VG1/LV1 changed from 39.99 GiB (10238 extents) to 15.00 GiB (3840 extents).</span><br><span class="line">  Logical volume VG1/LV1 successfully resized.</span><br></pre></td></tr></table></figure>
+
+<p>测试没有毛病，这里逻辑卷仍然是39.99G</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # lvs</span><br><span class="line">  LV   VG     Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  LV1  VG1    -wi-ao---- 39.99g</span><br><span class="line">  root system -wi-ao---- 15.99g</span><br><span class="line">linux-wugz:/home/lengqing # lvdisplay</span><br><span class="line">  --- Logical volume ---</span><br><span class="line">  LV Path                /dev/system/root</span><br><span class="line">  LV Name                root</span><br><span class="line">  VG Name                system</span><br><span class="line">  LV UUID                fsZvJJ-NCk9-rHvR-rSOh-80tK-9GxZ-H5BRSw</span><br><span class="line">  LV Write Access        read/write</span><br><span class="line">  LV Creation host, time install, 2019-10-04 00:06:45 +0800</span><br><span class="line">  LV Status              available</span><br><span class="line"><span class="meta">  #</span> open                 1</span><br><span class="line">  LV Size                15.99 GiB</span><br><span class="line">  Current LE             4093</span><br><span class="line">  Segments               1</span><br><span class="line">  Allocation             inherit</span><br><span class="line">  Read ahead sectors     auto</span><br><span class="line">  - currently set to     1024</span><br><span class="line">  Block device           254:0</span><br><span class="line"></span><br><span class="line">  --- Logical volume ---</span><br><span class="line">  LV Path                /dev/VG1/LV1</span><br><span class="line">  LV Name                LV1</span><br><span class="line">  VG Name                VG1</span><br><span class="line">  LV UUID                xAccOh-PRJd-jtuR-jx7F-F9Qr-N3nw-Cxm7yh</span><br><span class="line">  LV Write Access        read/write</span><br><span class="line">  LV Creation host, time linux-wugz, 2019-12-02 02:22:10 +0800</span><br><span class="line">  LV Status              available</span><br><span class="line"><span class="meta">  #</span> open                 1</span><br><span class="line">  LV Size                39.99 GiB</span><br><span class="line">  Current LE             10238</span><br><span class="line">  Segments               2</span><br><span class="line">  Allocation             inherit</span><br><span class="line">  Read ahead sectors     auto</span><br><span class="line">  - currently set to     1024</span><br><span class="line">  Block device           254:1</span><br></pre></td></tr></table></figure>
+
+<p>首先调整文件系统，先缩减逻辑卷到比文件系统小，文件系统大概也保不住</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # resize2fs /dev/mapper/VG1-LV1 15G</span><br><span class="line">resize2fs 1.43.8 (1-Jan-2018)</span><br><span class="line">Resizing the filesystem on /dev/mapper/VG1-LV1 to 3932160 (4k) blocks.</span><br><span class="line">The filesystem on /dev/mapper/VG1-LV1 is now 3932160 (4k) blocks long.</span><br></pre></td></tr></table></figure>
+
+<p>挂载分区并查看，文件系统已经是15G，之前的文件也没有问题</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # mount -a</span><br><span class="line">linux-wugz:/home/lengqing # df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 2.0G  8.0K  2.0G   1% /dev</span><br><span class="line">tmpfs                    2.0G     0  2.0G   0% /dev/shm</span><br><span class="line">tmpfs                    2.0G  9.4M  2.0G   1% /run</span><br><span class="line">tmpfs                    2.0G     0  2.0G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/system-root   16G  7.1G  8.9G  45% /</span><br><span class="line">tmpfs                    394M   12K  394M   1% /run/user/1000</span><br><span class="line">/dev/mapper/VG1-LV1       15G   41M   14G   1% /mnt/lvm</span><br><span class="line">linux-wugz:/home/lengqing # cat /mnt/lvm/l</span><br><span class="line">lengqinglvmext4  lost+found/</span><br><span class="line">linux-wugz:/home/lengqing # cat /mnt/lvm/l</span><br><span class="line">lengqinglvmext4  lost+found/</span><br><span class="line">linux-wugz:/home/lengqing # cat /mnt/lvm/lengqinglvmext4</span><br><span class="line">lengqinglvmext4</span><br></pre></td></tr></table></figure>
+
+<p>重新卸载分区并检查文件系统，缩减逻辑卷至15G，这次没有<code>-t</code>的参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # umount /mnt/lvm</span><br><span class="line">linux-wugz:/home/lengqing # e2fsck -f /dev/mapper/VG1-LV1</span><br><span class="line">e2fsck 1.43.8 (1-Jan-2018)</span><br><span class="line">Pass 1: Checking inodes, blocks, and sizes</span><br><span class="line">Pass 2: Checking directory structure</span><br><span class="line">Pass 3: Checking directory connectivity</span><br><span class="line">Pass 4: Checking reference counts</span><br><span class="line">Pass 5: Checking group summary information</span><br><span class="line">/dev/mapper/VG1-LV1: 12/983040 files (0.0% non-contiguous), 137494/3932160 blocks</span><br><span class="line">linux-wugz:/home/lengqing # lvreduce -L 15G /dev/VG1/LV1</span><br><span class="line">  WARNING: Reducing active logical volume to 15.00 GiB.</span><br><span class="line">  THIS MAY DESTROY YOUR DATA (filesystem etc.)</span><br><span class="line">Do you really want to reduce VG1/LV1? [y/n]: y</span><br><span class="line">  Size of logical volume VG1/LV1 changed from 39.99 GiB (10238 extents) to 15.00 GiB (3840 extents).</span><br><span class="line">  Logical volume VG1/LV1 successfully resized.</span><br></pre></td></tr></table></figure>
+
+<p>此时查看逻辑卷，LV1已经变成了15G</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # lvs</span><br><span class="line">  LV   VG     Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  LV1  VG1    -wi-a----- 15.00g</span><br><span class="line">  root system -wi-ao---- 15.99g</span><br><span class="line">linux-wugz:/home/lengqing # lvdisplay</span><br><span class="line">  --- Logical volume ---</span><br><span class="line">  LV Path                /dev/system/root</span><br><span class="line">  LV Name                root</span><br><span class="line">  VG Name                system</span><br><span class="line">  LV UUID                fsZvJJ-NCk9-rHvR-rSOh-80tK-9GxZ-H5BRSw</span><br><span class="line">  LV Write Access        read/write</span><br><span class="line">  LV Creation host, time install, 2019-10-04 00:06:45 +0800</span><br><span class="line">  LV Status              available</span><br><span class="line"><span class="meta">  #</span> open                 1</span><br><span class="line">  LV Size                15.99 GiB</span><br><span class="line">  Current LE             4093</span><br><span class="line">  Segments               1</span><br><span class="line">  Allocation             inherit</span><br><span class="line">  Read ahead sectors     auto</span><br><span class="line">  - currently set to     1024</span><br><span class="line">  Block device           254:0</span><br><span class="line"></span><br><span class="line">  --- Logical volume ---</span><br><span class="line">  LV Path                /dev/VG1/LV1</span><br><span class="line">  LV Name                LV1</span><br><span class="line">  VG Name                VG1</span><br><span class="line">  LV UUID                xAccOh-PRJd-jtuR-jx7F-F9Qr-N3nw-Cxm7yh</span><br><span class="line">  LV Write Access        read/write</span><br><span class="line">  LV Creation host, time linux-wugz, 2019-12-02 02:22:10 +0800</span><br><span class="line">  LV Status              available</span><br><span class="line"><span class="meta">  #</span> open                 0</span><br><span class="line">  LV Size                15.00 GiB</span><br><span class="line">  Current LE             3840</span><br><span class="line">  Segments               1</span><br><span class="line">  Allocation             inherit</span><br><span class="line">  Read ahead sectors     auto</span><br><span class="line">  - currently set to     1024</span><br><span class="line">  Block device           254:1</span><br></pre></td></tr></table></figure>
+
+<p>查看卷组VG1，已分配空间变成了15G，剩余空间还有24.99G</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # vgdisplay</span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               system</span><br><span class="line">  System ID</span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        1</span><br><span class="line">  Metadata Sequence No  2</span><br><span class="line">  VG Access             read/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                1</span><br><span class="line">  Open LV               1</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                1</span><br><span class="line">  Act PV                1</span><br><span class="line">  VG Size               15.99 GiB</span><br><span class="line">  PE Size               4.00 MiB</span><br><span class="line">  Total PE              4093</span><br><span class="line">  Alloc PE / Size       4093 / 15.99 GiB</span><br><span class="line">  Free  PE / Size       0 / 0</span><br><span class="line">  VG UUID               BfPwXl-TBTe-N6Rd-NaJT-xU2T-Ce0V-HqIN8L</span><br><span class="line"></span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               VG1</span><br><span class="line">  System ID</span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        2</span><br><span class="line">  Metadata Sequence No  5</span><br><span class="line">  VG Access             read/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                1</span><br><span class="line">  Open LV               0</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                2</span><br><span class="line">  Act PV                2</span><br><span class="line">  VG Size               39.99 GiB</span><br><span class="line">  PE Size               4.00 MiB</span><br><span class="line">  Total PE              10238</span><br><span class="line">  Alloc PE / Size       3840 / 15.00 GiB</span><br><span class="line">  Free  PE / Size       6398 / 24.99 GiB</span><br><span class="line">  VG UUID               ojpEne-jsFm-uB6R-azHU-zJmt-wP46-JvFeNc</span><br></pre></td></tr></table></figure>
+
+<p>挂载查看，文件系统正常，文件也还在</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # mount -a</span><br><span class="line">linux-wugz:/home/lengqing # df -h</span><br><span class="line">Filesystem               Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                 2.0G  8.0K  2.0G   1% /dev</span><br><span class="line">tmpfs                    2.0G     0  2.0G   0% /dev/shm</span><br><span class="line">tmpfs                    2.0G  9.4M  2.0G   1% /run</span><br><span class="line">tmpfs                    2.0G     0  2.0G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/system-root   16G  7.1G  8.9G  45% /</span><br><span class="line">tmpfs                    394M   12K  394M   1% /run/user/1000</span><br><span class="line">/dev/mapper/VG1-LV1       15G   41M   14G   1% /mnt/lvm</span><br><span class="line">linux-wugz:/home/lengqing # cat /mnt/lvm/lengqinglvmext4</span><br><span class="line">lengqinglvmext4</span><br></pre></td></tr></table></figure>
+
+<h2 id="移除物理磁盘"><a href="#移除物理磁盘" class="headerlink" title="移除物理磁盘"></a>移除物理磁盘</h2><p>移除之前，需要移除的磁盘不能有数据，所以需要将数据转移到其它磁盘上，其它磁盘需要足够大能容纳已分配的空间，然后转移完成就可以移除了。</p>
+<p>这里移除先添加的磁盘sdb，因为数据肯定在它上面。<del>（我猜的，管它在哪个上面，我就是要移除这块）</del></p>
+<p>将物理卷sdb1上的数据转移到物理卷sdc1上</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # pvmove /dev/sdb1 /dev/sdc1</span><br><span class="line">  /dev/sdb1: Moved: 4.90%</span><br><span class="line">  /dev/sdb1: Moved: 100.00%</span><br></pre></td></tr></table></figure>
+
+<p>完成之后，从卷组VG1中移除物理卷/dev/sdb1</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # vgreduce VG1 /dev/sdb1</span><br><span class="line">  Removed "/dev/sdb1" from volume group "VG1"</span><br></pre></td></tr></table></figure>
+
+<p>检查挂载以及文件，看起来完全正常</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # df -hT</span><br><span class="line">Filesystem              Type      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs                devtmpfs  2.0G  8.0K  2.0G   1% /dev</span><br><span class="line">tmpfs                   tmpfs     2.0G     0  2.0G   0% /dev/shm</span><br><span class="line">tmpfs                   tmpfs     2.0G  9.4M  2.0G   1% /run</span><br><span class="line">tmpfs                   tmpfs     2.0G     0  2.0G   0% /sys/fs/cgroup</span><br><span class="line">/dev/mapper/system-root xfs        16G  7.1G  8.9G  45% /</span><br><span class="line">tmpfs                   tmpfs     394M   12K  394M   1% /run/user/1000</span><br><span class="line">/dev/mapper/VG1-LV1     ext4       15G   41M   14G   1% /mnt/lvm</span><br><span class="line">linux-wugz:/home/lengqing # cat /mnt/lvm/lengqinglvmext4</span><br><span class="line">lengqinglvmext4</span><br></pre></td></tr></table></figure>
+
+<p>其实可以先查看物理卷的占用（我这里已经移除了sdb1，但也能看出来sdc1现在总共20G，用了15G，5G剩余）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">linux-wugz:/home/lengqing # pvscan</span><br><span class="line">  PV /dev/sda2   VG system          lvm2 [15.99 GiB / 0    free]</span><br><span class="line">  PV /dev/sdc1   VG VG1             lvm2 [20.00 GiB / 5.00 GiB free]</span><br><span class="line">  PV /dev/sdb1                      lvm2 [20.00 GiB]</span><br><span class="line">  Total: 3 [55.98 GiB] / in use: 2 [35.98 GiB] / in no VG: 1 [20.00 GiB]</span><br></pre></td></tr></table></figure>
+
+<h2 id="替换物理磁盘"><a href="#替换物理磁盘" class="headerlink" title="替换物理磁盘"></a>替换物理磁盘</h2><p>替换磁盘=先加入磁盘，再移除磁盘。</p>
+<p>方法和步骤前面都有。</p>
+<h1 id="完"><a href="#完" class="headerlink" title="完"></a>完</h1>
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>lengqing5977
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.lengqing.org/2019/12/02/Linux/LVM/" title="LVM的基本使用方法">https://www.lengqing.org/2019/12/02/Linux/LVM/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-hans" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/2019/10/19/Server/ipmi-control-fans/" rel="next" title="使用ipmitool控制戴尔R510服务器风扇转速">
+                  <i class="fa fa-chevron-left"></i> 使用ipmitool控制戴尔R510服务器风扇转速
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#LVM的基本使用方法"><span class="nav-number">1.</span> <span class="nav-text">LVM的基本使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#逻辑卷的创建与使用"><span class="nav-number">1.1.</span> <span class="nav-text">逻辑卷的创建与使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#逻辑卷的扩容"><span class="nav-number">1.2.</span> <span class="nav-text">逻辑卷的扩容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#逻辑卷的缩容"><span class="nav-number">1.3.</span> <span class="nav-text">逻辑卷的缩容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#移除物理磁盘"><span class="nav-number">1.4.</span> <span class="nav-text">移除物理磁盘</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#替换物理磁盘"><span class="nav-number">1.5.</span> <span class="nav-text">替换物理磁盘</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#完"><span class="nav-number">2.</span> <span class="nav-text">完</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="lengqing5977"
+    src="https://blog.lengqing.org/pics/blog/touxiangc.png">
+  <p class="site-author-name" itemprop="name">lengqing5977</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lengqing5977" title="GitHub &rarr; https://github.com/lengqing5977" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:root@lengqing.org" title="E-Mail &rarr; mailto:root@lengqing.org" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/zh-hans" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lengqing5977</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
